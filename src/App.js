@@ -1,26 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+
+import api from "./services/api";
 
 import "./styles.css";
 
 function App() {
+
+  const [repositories, setRepositories] = useState([]);
+
+  useEffect(() => {
+    api.get("repositories").then(response => {
+      setRepositories(response.data)
+    })
+  }, [repositories]);
+
   async function handleAddRepository() {
-    // TODO
+    const response = await api.post("repositories", {
+      title: `Titulo ${Math.random()}`,
+      url: "https://github.com/felipejoliver-fzr/BootcampDesafio1",
+      techs: [
+        "node",
+        "reactjs",
+        "react native"
+      ]
+    });
+
+    setRepositories([...repositories, response.data])
   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+
+    await api.delete(`repositories/${id}`);
+
+    const repositorieIndex = repositories.findIndex(repo => repo.id === id);
+
+    repositories.splice(repositorieIndex,1)
+
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        <li>
-          Repositório 1
 
-          <button onClick={() => handleRemoveRepository(1)}>
-            Remover
-          </button>
-        </li>
+        {repositories.map(repositorie =>
+
+          <li key={repositorie.id}>
+            {repositorie.title}
+
+            <button onClick={() => handleRemoveRepository(repositorie.id)}>
+              Remover
+              </button>
+          </li>
+
+        )}
+
       </ul>
 
       <button onClick={handleAddRepository}>Adicionar</button>
